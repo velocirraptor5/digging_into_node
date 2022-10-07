@@ -1,0 +1,17 @@
+version: "3.7"
+services:
+  server:
+      container_name: digging-into-node
+      hostname: digging-into-node
+      build:
+        context: ./..
+        dockerfile: ./docker/dockerfile
+      volumes:
+        - ${DIR}:/usr/src/app
+        - /usr/src/app/node_modules
+      ports:
+        - ${SERVER_PORT}:${SERVER_PORT}
+      # command: npm run dev
+      command: sleep infinity
+      env_file:
+        - .env
