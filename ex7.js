@@ -15,7 +15,10 @@ main().catch(console.error())
 async function main() {
     console.log(`Listening on http://localhost:${HTTP_POTH}...`);
 
+    var x = 0
+
     while (true) {
+        x++
         process.stdout.write(`Sending ${MAX_CHILDREN} requests..`)
 
         let children = []
@@ -33,6 +36,9 @@ async function main() {
                 })
             })
         })
+        if (x > 5) {
+            foo() //this fuction doesn´t exist, it only to take an error for debuging 
+        }
         resps = await Promise.all(resps)
 
         if (resps.filter(Boolean).length == MAX_CHILDREN) {
