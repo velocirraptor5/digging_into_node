@@ -29,10 +29,29 @@ var SQL3 = {
 
 var fileServer = new staticAlias.Server(WEB_PATH, {
     cache: 100,
-    serverInfo: "Node workshop: ex5"
+    serverInfo: "Node workshop: ex5",
     alias: [
-
-    ]
+        {
+            match: /^\/(?:index\/?)?(?:[?#].*$)?$/,
+            serve: "index.html",
+            force: true,
+        },
+        {
+            match: /^\/js\/.+$/,
+            serve: "<% absPath %>",
+            force: true,
+        },
+        {
+            match: /^\/(?:[\w\d]+)(?:[\/?#].*$)?$/,
+            serve: function onMatch(params) {
+                return `${params.basename}.html`;
+            },
+        },
+        {
+            match: /[^]/,
+            serve: "404.html",
+        },
+    ],
 })
 
 var httpserv = http.createServer(handelRequest)
@@ -44,12 +63,39 @@ function main() {
 }
 
 async function handelRequest(req, res) {
-    if (req.url == "/hello") {
-        res.writeHead(200, { "Content-type": "text/plain" })
-        res.end("hello world")
+    if (req.url == "/get-records") {
+        await delay(1000)
+        let records = await getAllRecors()
+
+        res.writeHead(200, {
+            "Content-Type": "application/json",
+            "Cache-Control": "no-cache"
+        })
+        res.end(JSON.stringify(records))
+
     }
     else {
-        res.writeHead(404)
-        res.end
+        fileServer.serve(req, res)
+    }
+    fileServer.serve(req, res)
+}
+
+
+
+async function getAllRecors() {
+    var result = await SQL3.all(
+        `
+            SELECT
+                Other.data as 'other',
+                Something.data as 'something'
+            FROM 
+                Something JOIN Other
+                ON (Something.otherID = Other.id)
+            ORDER BY 
+                Other.id DESC, Something.data ASC
+        `
+    )
+    if (result && result.length > 0) {
+        return result
     }
 }
